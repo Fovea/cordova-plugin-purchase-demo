@@ -33,18 +33,52 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        app.receivedEvent('deviceready');
+        app.initializeIAP();
     },
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
+    initializeIAP: function() {
+        if (!window.store) {
+            console.log(' not available');
+            return;
+        }
 
-        console.log('Received Event: ' + id);
+        store.debug = true;
+
+        store.registerProducts([{
+            id: 'babygooinapp1',
+            alias: 'full version',
+            type: store.NON_CONSUMABLE
+        }]);
+
+        store.ask("full version").then(function (p) {
+            console.log('Loaded IAP(' + p.id + ').' +
+                        ' title:' + p.title +
+                        ' description:' + p.description +
+                        ' price:' + p.localizedPrice +
+                        ' id:' + p.id);
+            app.renderIAP(p, null);
+        }).error(function (err) {
+            app.renderIAP(null, err);
+        });
+
+        store.process();
+    },
+
+    renderIAP: function(p, error) {
+        var el = document.getElementById('babygooinapp1-purchase');
+        if (error) {
+            el.innerHTML = '<div class="error">' + error.code + '</div>';
+        }
+        else {
+            var buttonStyle = "display:inline-block; padding: 5px 20px; border: 1px solid black";
+            el.innerHTML = "<h3>" + p.title + "</h3>" +
+                "<p>" + p.description + "</p>" +
+                "<div style='" + buttonStyle + "' id='buy-" + p.id + "' productId='" + p.id + "' type='button'>" + p.price + "</div>";
+            document.getElementById("buy-" + p.id).onclick = function (event) {
+                var pid = this.getAttribute("productId");
+                store.order(pid);
+            };
+        }
     }
 };
 
