@@ -51,17 +51,21 @@ var app = {
         }]);
 
         store.ask("full version").then(function (p) {
-            console.log('Loaded IAP(' + p.id + ').' +
-                        ' title:' + p.title +
-                        ' description:' + p.description +
-                        ' price:' + p.localizedPrice +
-                        ' id:' + p.id);
             app.renderIAP(p, null);
         }).error(function (err, p) {
             app.renderIAP(p, err);
         });
 
-        store.process();
+        store.error(function(error) {
+            alert('ERROR ' + error.code + ': ' + error.message);
+        });
+
+        store.when("full version").approved(function (order) {
+            alert('Unlocking full version!');
+            order.finish();
+        });
+
+        store.refresh();
     },
 
     renderIAP: function(p, error) {
