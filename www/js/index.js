@@ -57,17 +57,17 @@ var app = {
                         ' price:' + p.localizedPrice +
                         ' id:' + p.id);
             app.renderIAP(p, null);
-        }).error(function (err) {
-            app.renderIAP(null, err);
+        }).error(function (err, p) {
+            app.renderIAP(p, err);
         });
 
         store.process();
     },
 
     renderIAP: function(p, error) {
-        var el = document.getElementById('babygooinapp1-purchase');
+        var el = document.getElementById(p.id + '-purchase');
         if (error) {
-            el.innerHTML = '<div class="error">' + error.code + '</div>';
+            el.innerHTML = '<div class="error">ERROR: ' + error.code + ', ' + error.message + '</div>';
         }
         else {
             var buttonStyle = "display:inline-block; padding: 5px 20px; border: 1px solid black";
