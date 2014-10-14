@@ -45,9 +45,13 @@ var app = {
         store.debug = true;
 
         store.registerProducts([{
-            id: 'babygooinapp1',
+            id:    'cc.fovea.purchase.consumable1',
+            alias: 'extra life',
+            type:   store.CONSUMABLE
+        }, {
+            id:    'cc.fovea.purchase.nonconsumable1',
             alias: 'full version',
-            type: store.NON_CONSUMABLE
+            type:   store.NON_CONSUMABLE
         }]);
 
         store.ask("full version").then(function (p) {
@@ -56,12 +60,23 @@ var app = {
             app.renderIAP(p, err);
         });
 
+        store.when("extra life").loaded(function (p) {
+            console.log("product " + p.id + " loaded");
+            app.renderIAP(p, null);
+        });
+
         store.error(function(error) {
             alert('ERROR ' + error.code + ': ' + error.message);
         });
 
+        store.when("extra life").approved(function (order) {
+            alert("EXTRA LIFE!");
+            alert(JSON.stringify(order));
+            order.finish();
+        });
+
         store.when("full version").approved(function (order) {
-            alert('Unlocking full version!');
+            alert('Unlocking FULL VERSION!');
             order.finish();
         });
 
@@ -69,7 +84,12 @@ var app = {
     },
 
     renderIAP: function(p, error) {
-        var el = document.getElementById(p.id + '-purchase');
+
+        var elId = p.id.split(".")[3];
+
+        var el = document.getElementById(elId + '-purchase');
+        if (!el) return;
+
         if (error) {
             el.innerHTML = '<div class="error">ERROR: ' + error.code + ', ' + error.message + '</div>';
         }
