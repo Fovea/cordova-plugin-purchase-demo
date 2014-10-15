@@ -16,29 +16,44 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+function log(arg) { app.log(arg); }
+
 var app = {
+
+    log: function(arg) {
+        if (typeof arg !== 'string')
+            arg = JSON.stringify(arg);
+        document.getElementById('log').innerHTML += '<div>' + arg + '</div>';
+    },
+
     // Application Constructor
     initialize: function() {
+        log('initialize');
         this.bindEvents();
     },
+
     // Bind Event Listeners
     //
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
+        log('bindEvents');
         document.addEventListener('deviceready', this.onDeviceReady, false);
     },
+ 
     // deviceready Event Handler
     //
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
+        log('onDeviceReady');
         app.initializeIAP();
     },
 
     initializeIAP: function() {
         if (!window.store) {
-            console.log(' not available');
+            log('Store not available');
             return;
         }
 
@@ -61,7 +76,7 @@ var app = {
         });
 
         store.when("extra life").loaded(function (p) {
-            console.log("product " + p.id + " loaded");
+            log("product " + p.id + " loaded");
             app.renderIAP(p, null);
         });
 

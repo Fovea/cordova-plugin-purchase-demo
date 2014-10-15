@@ -45,3 +45,8 @@ h1 {
     padding:0px;
     text-align:center;
 }
+
+#log {
+    font-size: 0.7em;
+    font-family: monospace;
+}
