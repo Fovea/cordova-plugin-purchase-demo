@@ -22,9 +22,12 @@ function log(arg) { app.log(arg); }
 var app = {
 
     log: function(arg) {
-        if (typeof arg !== 'string')
-            arg = JSON.stringify(arg);
-        document.getElementById('log').innerHTML += '<div>' + arg + '</div>';
+        try {
+            if (typeof arg !== 'string')
+                arg = JSON.stringify(arg);
+            console.log(arg);
+            document.getElementById('log').innerHTML += '<div>' + arg + '</div>';
+        } catch (e) {}
     },
 
     // Application Constructor
@@ -57,8 +60,9 @@ var app = {
             return;
         }
 
-        store.debug = true;
+        store.debug = store.DEBUG;
 
+        log('registerProducts');
         store.registerProducts([{
             id:    'cc.fovea.purchase.consumable1',
             alias: 'extra life',
@@ -70,53 +74,60 @@ var app = {
         }]);
 
         store.ask("full version").then(function (p) {
-            app.renderIAP(p, null);
+            log("full version loaded");
         }).error(function (err, p) {
-            app.renderIAP(p, err);
+            log("full version loaded with error");
         });
 
-        store.when("extra life").loaded(function (p) {
-            log("product " + p.id + " loaded");
-            app.renderIAP(p, null);
+        // When any product gets updated, refresh the HTML.
+        store.when("product").updated(function (p) {
+            app.renderIAP(p);
         });
 
         store.error(function(error) {
-            alert('ERROR ' + error.code + ': ' + error.message);
+            log('ERROR ' + error.code + ': ' + error.message);
         });
 
         store.when("extra life").approved(function (order) {
-            alert("EXTRA LIFE!");
-            alert(JSON.stringify(order));
+            log("EXTRA LIFE!");
             order.finish();
         });
 
         store.when("full version").approved(function (order) {
-            alert('Unlocking FULL VERSION!');
+            log('Unlocking FULL VERSION!');
             order.finish();
         });
 
+        log('refresh');
         store.refresh();
     },
 
-    renderIAP: function(p, error) {
+    renderIAP: function(p) {
 
         var elId = p.id.split(".")[3];
 
         var el = document.getElementById(elId + '-purchase');
         if (!el) return;
 
-        if (error) {
-            el.innerHTML = '<div class="error">ERROR: ' + error.code + ', ' + error.message + '</div>';
+        if (!p.loaded) {
+            el.innerHTML = '<h3>...</h3>';
         }
-        else {
+        else if (!p.valid) {
+            el.innerHTML = '<h3>' + p.alias + ' Invalid</h3>';
+        }
+        else if (p.valid) {
             var buttonStyle = "display:inline-block; padding: 5px 20px; border: 1px solid black";
-            el.innerHTML = "<h3>" + p.title + "</h3>" +
-                "<p>" + p.description + "</p>" +
-                "<div style='" + buttonStyle + "' id='buy-" + p.id + "' productId='" + p.id + "' type='button'>" + p.price + "</div>";
-            document.getElementById("buy-" + p.id).onclick = function (event) {
-                var pid = this.getAttribute("productId");
-                store.order(pid);
-            };
+            var html = "<h3>" + p.title + "</h3>" + "<p>" + p.description + "</p>";
+            if (p.canPurchase) {
+                html += "<div style='" + buttonStyle + "' id='buy-" + p.id + "' productId='" + p.id + "' type='button'>" + p.price + "</div>";
+            }
+            el.innerHTML = html;
+            if (p.canPurchase) {
+                document.getElementById("buy-" + p.id).onclick = function (event) {
+                    var pid = this.getAttribute("productId");
+                    store.order(pid);
+                };
+            }
         }
     }
 };
