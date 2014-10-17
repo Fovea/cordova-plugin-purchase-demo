@@ -98,7 +98,7 @@ app.initStore = function() {
     // The play button can only be accessed when the user
     // owns the full version.
     store.when("full version").updated(function (product) {
-        document.getElementById("play-button").style.display =
+        document.getElementById("access-full-version-button").style.display =
             (product.state === store.OWNED) ? "block" : "none";
     });
 
@@ -108,7 +108,9 @@ app.initStore = function() {
     // Note that the "ready" function will be called immediately if the store
     // is already ready.
     store.ready(function() {
-        document.getElementById("loading-indicator").style.display = 'none';
+        var el = document.getElementById("loading-indicator");
+        if (el)
+            el.style.display = 'none';
     });
 
     // Alternatively, it's technically feasible to have a button that
@@ -155,10 +157,9 @@ app.renderIAP = function(p) {
         el.innerHTML = '<h3>' + p.alias + ' Invalid</h3>';
     }
     else if (p.valid) {
-        var buttonStyle = "";
         var html = "<h3>" + p.title + "</h3>" + "<p>" + p.description + "</p>";
         if (p.canPurchase) {
-            html += "<div style='" + buttonStyle + "' id='buy-" + p.id + "' productId='" + p.id + "' type='button'>" + p.price + "</div>";
+            html += "<div class='button' id='buy-" + p.id + "' productId='" + p.id + "' type='button'>" + p.price + "</div>";
         }
         el.innerHTML = html;
         if (p.canPurchase) {
