@@ -29,13 +29,19 @@
     </head>
     <body>
         <div class="app">
+            <h3 id="loading-indicator">Loading</h3>
             <div id="in-app-purchase-list">
-                <div id="consumable1-purchase">Loading...</div>
-                <div id="nonconsumable1-purchase">Loading...</div>
+                <div id="consumable1-purchase">...</div>
+                <div id="nonconsumable1-purchase">...</div>
             </div>
         </div>
-        <div id="log">
-        </div>
+
+        <!-- Button to access the full version features are initially hidden -->
+        <div id="access-full-version-button" class="button" style="display:none">Access the awesome Full Version feature</div>
+
+        <!-- app.log will add stuff in here -->
+        <div id="log" />
+
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
     </body>
