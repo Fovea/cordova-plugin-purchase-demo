@@ -61,15 +61,17 @@ app.initStore = function() {
 
     // Inform the store of your products
     log('registerProducts');
-    store.registerProducts([{
+    store.register({
         id:    'cc.fovea.purchase.consumable1',
         alias: 'extra life',
         type:   store.CONSUMABLE
-    }, {
+    });
+    
+    store.register({
         id:    'cc.fovea.purchase.nonconsumable1',
         alias: 'full version',
         type:   store.NON_CONSUMABLE
-    }]);
+    });
 
     // When any product gets updated, refresh the HTML.
     store.when("product").updated(function (p) {
@@ -99,7 +101,7 @@ app.initStore = function() {
     // owns the full version.
     store.when("full version").updated(function (product) {
         document.getElementById("access-full-version-button").style.display =
-            (product.state === store.OWNED) ? "block" : "none";
+            product.owned ? "block" : "none";
     });
 
     // When the store is ready (i.e. all products are loaded and in their "final"
@@ -195,6 +197,5 @@ app.bind = function(fn) {
         fn.call(app, arguments);
     };
 };
-
 
 app.initialize();
