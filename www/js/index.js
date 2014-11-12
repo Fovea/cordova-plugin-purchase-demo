@@ -59,6 +59,9 @@ app.initStore = function() {
     // Enable maximum logging level
     store.verbosity = store.DEBUG;
 
+    // Enable remote receipt validation
+    store.validator = "https://api.fovea.cc:1982/check-purchase";
+
     // Inform the store of your products
     log('registerProducts');
     store.register({
@@ -66,16 +69,42 @@ app.initStore = function() {
         alias: 'extra life',
         type:   store.CONSUMABLE
     });
-    
+
     store.register({
         id:    'cc.fovea.purchase.nonconsumable1',
         alias: 'full version',
         type:   store.NON_CONSUMABLE
     });
 
+    store.register({
+        id:    'cc.fovea.purchase.subscription1',
+        alias: 'subscription1',
+        type:  store.PAID_SUBSCRIPTION
+    });
+
     // When any product gets updated, refresh the HTML.
     store.when("product").updated(function (p) {
         app.renderIAP(p);
+    });
+
+    store.when("subscription1").approved(function(p) {
+        log("verify subscription");
+        p.verify();
+    });
+    store.when("subscription1").verified(function(p) {
+        log("subscription verified");
+        p.finish();
+    });
+    store.when("subscription1").unverified(function(p) {
+        log("subscription unverified");
+    });
+    store.when("subscription1").updated(function(p) {
+        if (p.owned) {
+            document.getElementById('subscriber-info').innerHTML = 'You are a lucky subscriber!';
+        }
+        else {
+            document.getElementById('subscriber-info').innerHTML = 'You are not subscribed';
+        }
     });
 
     // Log all errors
@@ -106,13 +135,24 @@ app.initStore = function() {
 
     // When the store is ready (i.e. all products are loaded and in their "final"
     // state), we hide the "loading" indicator.
-    // 
+    //
     // Note that the "ready" function will be called immediately if the store
     // is already ready.
     store.ready(function() {
         var el = document.getElementById("loading-indicator");
         if (el)
             el.style.display = 'none';
+    });
+
+    // When store is ready, activate the "refresh" button;
+    store.ready(function() {
+        var el = document.getElementById('refresh-button');
+        if (el) {
+            el.style.display = 'block';
+            el.onclick = function(ev) {
+                store.refresh();
+            };
+        }
     });
 
     // Alternatively, it's technically feasible to have a button that
