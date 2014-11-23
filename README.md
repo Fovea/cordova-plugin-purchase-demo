@@ -19,7 +19,7 @@ usage
     cordova plugin add cc.fovea.cordova.purchase
 ```
  - setup for ios
-   - setup your app-id, provisioning profile, in-app-purchases.
+   - see https://github.com/j3k0/cordova-plugin-purchase/wiki/Setup
 
  - compile for ios
 ```
@@ -30,7 +30,7 @@ usage
      provisioning profile issues XCode will be able to address.
 
  - setup for android
-   - https://github.com/poiuytrez/AndroidInAppBilling/blob/master/v3/README.md#finish-setting-up-your-app
+   - see https://github.com/j3k0/cordova-plugin-purchase/wiki/Setup
 
  - compile for android
 ```
