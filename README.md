@@ -16,7 +16,7 @@ usage
 ```
  - add the purchase plugin:
 ```
-    cordova plugin add "git@github.com:j3k0/PhoneGap-InAppPurchase-iOS.git"
+    cordova plugin add cc.fovea.cordova.purchase
 ```
  - setup for ios
    - setup your app-id, provisioning profile, in-app-purchases.
