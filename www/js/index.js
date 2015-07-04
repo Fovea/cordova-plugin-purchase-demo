@@ -45,7 +45,11 @@ app.initialize = function() {
 // will just initialize the Purchase plugin
 app.onDeviceReady = function() {
     log('onDeviceReady');
-    this.initStore();
+    alert("This alert interrupts the main JS thread so you can connect a remote debugger to the WebView...");
+    setTimeout(function(){
+        this.initStore();
+    }.bind(this), 2000);
+    
 };
 
 // initialize the purchase plugin if available
@@ -56,6 +60,8 @@ app.initStore = function() {
         return;
     }
 
+    debugger;
+
     // Enable maximum logging level
     store.verbosity = store.DEBUG;
 
@@ -65,22 +71,29 @@ app.initStore = function() {
     // Inform the store of your products
     log('registerProducts');
     store.register({
-        id:    'cc.fovea.purchase.consumable1',
+        id:    'uk.co.workingedge.test.inapp.consumable1',
         alias: 'extra life',
         type:   store.CONSUMABLE
     });
 
     store.register({
-        id:    'cc.fovea.purchase.nonconsumable1',
+        id:    'uk.co.workingedge.test.inapp.nonconsumable1',
         alias: 'full version',
         type:   store.NON_CONSUMABLE
     });
 
     store.register({
-        id:    'cc.fovea.purchase.subscription1',
+        id:    'uk.co.workingedge.test.inapp.subscription1',
         alias: 'subscription1',
         type:  store.PAID_SUBSCRIPTION
     });
+
+    store.register({
+        id:    'uk.co.workingedge.test.inapp.nonconsumablehosted1',
+        alias: 'hosted1',
+        type:   store.NON_CONSUMABLE
+    });
+
 
     // When any product gets updated, refresh the HTML.
     store.when("product").updated(function (p) {
@@ -187,7 +200,8 @@ app.initStore = function() {
 
 app.renderIAP = function(p) {
 
-    var elId = p.id.split(".")[3];
+    var parts = p.id.split(".");
+    var elId = parts[parts.length-1];
 
     var el = document.getElementById(elId + '-purchase');
     if (!el) return;
