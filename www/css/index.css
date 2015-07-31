@@ -63,7 +63,8 @@ h1 {
     font-weight: bold;
 }
 
-#in-app-purchase-list div{
+#in-app-purchase-list div,
+.section{
     border-bottom: 1px solid #000;
     margin-bottom: 10px;
     padding-bottom: 10px;
