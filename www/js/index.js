@@ -149,8 +149,6 @@ app.initStore = function() {
 
     // Show progress during download
     store.when("hosted download").downloading(function(p, progress, eta) {
-        var el = document.getElementById("non-consumable-hosted-download");
-        el.style.display = "block";
         el.innerHTML = 'Progress: ' + progress + '%; ETA=' + eta + ' seconds';
     });
 
@@ -165,10 +163,10 @@ app.initStore = function() {
         });
     });
 
-    // The downloaded content is visible once the product is downloaded
+    // Show download element if the product is downloading or downloaded
     store.when("hosted download").updated(function (product) {
         document.getElementById("non-consumable-hosted-download").style.display =
-            product.downloaded ? "block" : "none";
+            (product.downloading || product.downloaded) ? "block" : "none";
     });
 
     // When the store is ready (i.e. all products are loaded and in their "final"
