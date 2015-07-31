@@ -149,7 +149,7 @@ app.initStore = function() {
 
     // Show progress during download
     store.when("hosted download").downloading(function(p) {
-        el.innerHTML = 'Progress: ' + p.progress + '%; ETA=' + p.timeRemaining + ' seconds';
+        document.getElementById('non-consumable-hosted-download').innerHTML = 'Progress: ' + p.progress + '%; ETA=' + p.timeRemaining + ' seconds';
     });
 
     // Use contents of downloaded package to populate page element
