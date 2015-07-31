@@ -90,7 +90,7 @@ app.initStore = function() {
 
     store.register({
         id:    'uk.co.workingedge.test.inapp.nonconsumablehosted1',
-        alias: 'hosted1',
+        alias: 'hosted download',
         type:   store.NON_CONSUMABLE
     });
 
@@ -144,6 +144,31 @@ app.initStore = function() {
     store.when("full version").updated(function (product) {
         document.getElementById("access-full-version-button").style.display =
             product.owned ? "block" : "none";
+    });
+
+
+    // Show progress during download
+    store.when("hosted download").downloading(function(p, progress, eta) {
+        var el = document.getElementById("non-consumable-hosted-download");
+        el.style.display = "block";
+        el.innerHTML = 'Progress: ' + progress + '%; ETA=' + eta + ' seconds';
+    });
+
+    // Use contents of downloaded package to populate page element
+    store.when("hosted download").downloaded(function(p) {
+        window.resolveLocalFileSystemURL(cordova.file.documentsDirectory, function(dir){
+            var path = dir.nativeURL;
+            log("Documents folder path: " + dir.nativeURL);
+            document.getElementById('non-consumable-hosted-download').innerHTML = "Downloaded";
+        }, function(error){
+            log("Error resolving app documents folder: "+JSON.stringify(error));
+        });
+    });
+
+    // The downloaded content is visible once the product is downloaded
+    store.when("hosted download").updated(function (product) {
+        document.getElementById("non-consumable-hosted-download").style.display =
+            product.downloaded ? "block" : "none";
     });
 
     // When the store is ready (i.e. all products are loaded and in their "final"
