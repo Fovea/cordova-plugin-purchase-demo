@@ -45,7 +45,7 @@ app.initialize = function() {
 // will just initialize the Purchase plugin
 app.onDeviceReady = function() {
     log('onDeviceReady');
-    alert("This alert interrupts the main JS thread so you can connect a remote debugger to the WebView...");
+    //alert("This alert interrupts the main JS thread so you can connect a remote debugger to the WebView...");
     setTimeout(function(){
         this.initStore();
     }.bind(this), 2000);
@@ -60,7 +60,7 @@ app.initStore = function() {
         return;
     }
 
-    debugger;
+    //debugger;
 
     // Enable maximum logging level
     store.verbosity = store.DEBUG;
@@ -146,10 +146,20 @@ app.initStore = function() {
             product.owned ? "block" : "none";
     });
 
+    // When purchase of the downloadable content is approved,
+    // show some logs and finish the transaction.
+    store.when("content download").approved(function (order) {
+        log("You've purchased the content - it will now download to your device!");
+        order.finish();
+    });
 
     // Show progress during content download
     store.when("content download").downloading(function(p) {
-        document.getElementById('non-consumable-content-download').innerHTML = 'Downloading content: ' + p.progress + '%; ETA=' + p.timeRemaining + ' seconds';
+        var html = 'Downloading content: ' + p.progress + '%';
+        if(p.timeRemaining >= 0){
+            html += '; ETA=' + p.timeRemaining + ' seconds';
+        }
+        document.getElementById('non-consumable-content-download').innerHTML = html;
     });
 
     // Show download element if the product content is downloading or downloaded
@@ -243,15 +253,22 @@ app.renderIAP = function(p) {
 
 app.displayDownloadedContent = function(p){
     var failedFileReadCallback = function(error){
-        log("Error resolving reading downloaded content: "+JSON.stringify(error));
+        log("Error reading downloaded content: "+JSON.stringify(error));
     };
 
-    window.resolveLocalFileSystemURL(cordova.file.documentsDirectory + "/" + p.id, function(dir){
-        dir.getFile(fileName, {create: false}, function (fileEntry) {
+    window.resolveLocalFileSystemURL(cordova.file.documentsDirectory + p.id.split(".").pop(), function(dir){
+        dir.getFile("payload.txt", {create: false}, function (fileEntry) {
             fileEntry.file(function(file) {
                 var reader = new FileReader();
                 reader.onloadend = function(evt) {
-                    document.getElementById('non-consumable-content-download').innerHTML = evt.target.result;
+                    if(evt.target.error){
+                        failedFileReadCallback(evt.target.error)
+                    }else if(evt.target.result){
+                        document.getElementById('non-consumable-content-download').innerHTML = evt.target.result;
+                    }else{
+                        failedFileReadCallback("No file contents found");
+                    }
+                    
                 };
                 reader.readAsText(file);
             }, failedFileReadCallback);
