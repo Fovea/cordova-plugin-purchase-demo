@@ -147,10 +147,9 @@ app.initStore = function() {
     });
 
     // When purchase of the downloadable content is approved,
-    // show some logs and finish the transaction.
+    // show some logs.
     store.when("content download").approved(function (order) {
         log("You've purchased the content - it will now download to your device!");
-        order.finish();
     });
 
     // Show progress during content download
@@ -163,10 +162,12 @@ app.initStore = function() {
     });
 
     // Show download element if the product content is downloading or downloaded
+    // When content download is complete, display the downloaded content and finish the transaction
     store.when("content download").updated(function (product) {
         document.getElementById("non-consumable-content-download").style.display = (product.downloading || product.downloaded) ? "block" : "none";
         if(product.downloaded){
             app.displayDownloadedContent(product);
+            order.finish();
         }
     });
 
