@@ -90,7 +90,7 @@ app.initStore = function() {
 
     store.register({
         id:    'uk.co.workingedge.test.inapp.nonconsumablehosted1',
-        alias: 'hosted download',
+        alias: 'content download',
         type:   store.NON_CONSUMABLE
     });
 
@@ -147,26 +147,17 @@ app.initStore = function() {
     });
 
 
-    // Show progress during download
-    store.when("hosted download").downloading(function(p) {
-        document.getElementById('non-consumable-hosted-download').innerHTML = 'Progress: ' + p.progress + '%; ETA=' + p.timeRemaining + ' seconds';
+    // Show progress during content download
+    store.when("content download").downloading(function(p) {
+        document.getElementById('non-consumable-content-download').innerHTML = 'Downloading content: ' + p.progress + '%; ETA=' + p.timeRemaining + ' seconds';
     });
 
-    // Use contents of downloaded package to populate page element
-    store.when("hosted download").downloaded(function(p) {
-        window.resolveLocalFileSystemURL(cordova.file.documentsDirectory, function(dir){
-            var path = dir.nativeURL;
-            log("Documents folder path: " + dir.nativeURL);
-            document.getElementById('non-consumable-hosted-download').innerHTML = "Downloaded";
-        }, function(error){
-            log("Error resolving app documents folder: "+JSON.stringify(error));
-        });
-    });
-
-    // Show download element if the product is downloading or downloaded
-    store.when("hosted download").updated(function (product) {
-        document.getElementById("non-consumable-hosted-download").style.display =
-            (product.downloading || product.downloaded) ? "block" : "none";
+    // Show download element if the product content is downloading or downloaded
+    store.when("content download").updated(function (product) {
+        document.getElementById("non-consumable-content-download").style.display = (product.downloading || product.downloaded) ? "block" : "none";
+        if(product.downloaded){
+            app.displayDownloadedContent(product);
+        }
     });
 
     // When the store is ready (i.e. all products are loaded and in their "final"
@@ -248,6 +239,24 @@ app.renderIAP = function(p) {
             };
         }
     }
+};
+
+app.displayDownloadedContent = function(p){
+    var failedFileReadCallback = function(error){
+        log("Error resolving reading downloaded content: "+JSON.stringify(error));
+    };
+
+    window.resolveLocalFileSystemURL(cordova.file.documentsDirectory + "/" + p.id, function(dir){
+        dir.getFile(fileName, {create: false}, function (fileEntry) {
+            fileEntry.file(function(file) {
+                var reader = new FileReader();
+                reader.onloadend = function(evt) {
+                    document.getElementById('non-consumable-content-download').innerHTML = evt.target.result;
+                };
+                reader.readAsText(file);
+            }, failedFileReadCallback);
+        }, failedFileReadCallback);
+    },failedFileReadCallback);
 };
 
 // 

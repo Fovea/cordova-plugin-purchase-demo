@@ -57,16 +57,25 @@ h1 {
     border: 1px solid black;
     margin: 10px 0;
 }
+.button:empty{
+    border: none !important;
+}
 
 #subscriber-info {
     margin: 10px 0;
     font-weight: bold;
 }
 
-#in-app-purchase-list div,
-.section{
+#non-consumable-content-download{
+    padding: 5px 20px;
+}
+
+#in-app-purchase-list div, .section{
     border-bottom: 1px solid #000;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+}
+#in-app-purchase-list div:empty, .section:empty{
+    border: none !important;
 }
 
