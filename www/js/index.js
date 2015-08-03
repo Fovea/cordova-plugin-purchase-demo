@@ -65,19 +65,19 @@ app.initStore = function() {
     // Inform the store of your products
     log('registerProducts');
     store.register({
-        id:    'cc.fovea.purchase.consumable1',
+        id:    'consumable1', // id without package name!
         alias: 'extra life',
         type:   store.CONSUMABLE
     });
 
     store.register({
-        id:    'cc.fovea.purchase.nonconsumable1',
+        id:    'nonconsumable1', // id without package name!
         alias: 'full version',
         type:   store.NON_CONSUMABLE
     });
 
     store.register({
-        id:    'cc.fovea.purchase.subscription1',
+        id:    'subscription1', // id without package name!
         alias: 'subscription1',
         type:  store.PAID_SUBSCRIPTION
     });
