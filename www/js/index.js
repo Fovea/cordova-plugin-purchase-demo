@@ -63,7 +63,7 @@ app.initStore = function() {
     }
 
     app.platform = device.platform.toLowerCase();
-    document.getElementByTagName('body').className = app.platform;
+    document.getElementsByTagName('body')[0].className = app.platform;
 
     //debugger;
 
