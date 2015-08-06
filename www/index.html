@@ -6,6 +6,10 @@
         <meta name="msapplication-tap-highlight" content="no" />
         <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+
+        <!-- Enable all requests, inline styles, and eval() -->
+        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+
         <link rel="stylesheet" type="text/css" href="css/index.css" />
         <title>Hello World</title>
     </head>
@@ -17,20 +21,31 @@
                 <div id="consumable1-purchase"></div>
                 <div id="nonconsumable1-purchase"></div>
                 <div id="subscription1-purchase"></div>
+                <div id="nonconsumablenonhosted1-purchase"></div>
+                <div id="nonconsumablehosted1-purchase" class="ios-only"></div>
             </div>
         </div>
 
         <!-- Are we subscribers? -->
-        <div id="subscriber-info">Loading subscription status...</div>
+        <div id="subscriber-info" class="section">Loading subscription status...</div>
 
-        <!-- Button to access the full version feature: initially hidden -->
-        <div id="access-full-version-button" class="button" style="display:none">Access the awesome Full Version feature</div>
+        <!-- Non-consumable non-(provider-)hosted content download -->
+        <div id="non-consumable-non-hosted-content-download" class="section" style="display:none"></div>
 
-        <!-- Button to access the full version feature: initially hidden -->
-        <div id="refresh-button" class="button" style="display:none">Refresh purchases</div>
+        <!-- Non-consumable Apple-hosted content download -->
+        <div id="non-consumable-hosted-content-download" class="section ios-only" style="display:none"></div>
+
+        <div class="section">
+            <!-- Button to access the full version feature: initially hidden -->
+            <div id="access-full-version-button" class="button" style="display:none">Access the awesome Full Version feature</div>
+
+            <!-- Button to access the full version feature: initially hidden -->
+            <div id="refresh-button" class="button" style="display:none">Refresh purchases</div>
+
+        </div>
 
         <!-- app.log will add stuff in here -->
-        <div id="log" />
+        <div id="log" class="section" />
 
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/index.js"></script>

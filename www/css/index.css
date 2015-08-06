@@ -32,6 +32,14 @@ body {
     width:100%;
 }
 
+.ios-only, .android-only{
+    display: none;
+}
+body.android .android-only,
+body.ios .ios-only{
+    display: block;
+}
+
 .app {
     padding: 2em;
     text-align:center;
@@ -57,9 +65,26 @@ h1 {
     border: 1px solid black;
     margin: 10px 0;
 }
+.button:empty{
+    border: none !important;
+}
 
 #subscriber-info {
     margin: 10px 0;
     font-weight: bold;
+}
+
+#non-consumable-hosted-content-download,
+#non-consumable-non-hosted-content-download{
+    padding: 5px 20px;
+}
+
+#in-app-purchase-list div, .section{
+    border-bottom: 1px solid #000;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+}
+#in-app-purchase-list div:empty, .section:empty{
+    border: none !important;
 }
 

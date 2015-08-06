@@ -9,4 +9,10 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <plugin name="cordova-plugin-whitelist" version="1.0"/>
+    <plugin name="cordova-plugin-file" version="2" />
+    <plugin name="cordova-plugin-device" version="1" />
+    <plugin name="cordova-plugin-zip" version="3" />
+    <plugin name="cordova-plugin-file-transfer" version="1" />
+
 </widget>

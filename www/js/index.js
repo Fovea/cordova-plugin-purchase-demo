@@ -22,6 +22,8 @@
 // Our application's global object
 var app = {};
 
+app.nonHostedContentUrl = "http://ge.tt/api/1/files/3JSfJhL2/0/blob?download";
+
 //
 // Constructor
 // -----------
@@ -56,6 +58,9 @@ app.initStore = function() {
         return;
     }
 
+    app.platform = device.platform.toLowerCase();
+    document.getElementsByTagName('body')[0].className = app.platform;
+
     // Enable maximum logging level
     store.verbosity = store.DEBUG;
 
@@ -81,6 +86,21 @@ app.initStore = function() {
         alias: 'subscription1',
         type:  store.PAID_SUBSCRIPTION
     });
+
+    store.register({
+        id:    'nonconsumablenonhosted1', // id without package name!
+        alias: 'non-hosted content download',
+        type:   store.NON_CONSUMABLE
+    });
+
+    if(app.platform === "ios"){
+        store.register({
+            id:    'nonconsumablehosted1', // id without package name!
+            alias: 'hosted content download',
+            type:   store.NON_CONSUMABLE
+        });
+    }
+
 
     // When any product gets updated, refresh the HTML.
     store.when("product").updated(function (p) {
@@ -131,6 +151,81 @@ app.initStore = function() {
     store.when("full version").updated(function (product) {
         document.getElementById("access-full-version-button").style.display =
             product.owned ? "block" : "none";
+    });
+
+    /*
+     * iOS Apple-hosted content
+     */
+
+    // When purchase of the downloadable content is approved,
+    // show some logs.
+    store.when("hosted content download").approved(function (product) {
+        log("You've purchased the content for " + product.id + " - it will now download to your device!");
+    });
+
+    // Show progress during hosted content download
+    store.when("hosted content download").downloading(function(product) {
+        var html = 'Downloading content: ' + product.progress + '%';
+        document.getElementById('non-consumable-hosted-content-download').innerHTML = html;
+    });
+
+    // When hosted content download is complete, finish the transaction
+    store.when("hosted content download").downloaded(function(product) {
+        product.finish();
+    });
+
+    // If the product content is downloading or downloaded, display the downloaded content
+    store.when("hosted content download").updated(function (product) {
+        var displayEl = document.getElementById("non-consumable-hosted-content-download");
+        if(product.downloading || product.downloaded){
+            displayEl.style.display = "block";
+        }else{
+            displayEl.style.display = "none";
+        }
+        if(product.downloaded){
+            var productName = product.id.split(".").pop();
+            displayDownloadedContent(cordova.file.documentsDirectory + productName, displayEl);
+        }
+    });
+
+    /*
+     * Non-hosted (self-hosted) content
+     */
+
+    // When purchase of the downloadable content is approved,
+    // show some logs.
+    store.when("non-hosted content download").approved(function (product) {
+        log("You've purchased the content for " + product.id + " - it will now download to your device!");
+        downloadNonHostedContent(product);
+    });
+
+    // Show progress during hosted content download
+    store.when("non-hosted content download").downloading(function(product) {
+        var html = 'Downloading content';
+         if(product.progress >= 0){
+            html += ': ' + product.progress + '%';
+         }
+         document.getElementById('non-consumable-non-hosted-content-download').innerHTML = html;
+    });
+
+    // When hosted content download is complete, finish the transaction
+    store.when("non-hosted content download").downloaded(function(product) {
+        product.finish();
+    });
+
+    // Show download element if the product content is downloading or downloaded
+    // When hosted content download is complete, display the downloaded content and finish the transaction
+    store.when("non-hosted content download").updated(function (product) {
+        var displayEl = document.getElementById("non-consumable-non-hosted-content-download");
+        if(product.downloading || product.downloaded){
+            displayEl.style.display = "block";
+        }else{
+            displayEl.style.display = "none";
+        }
+        if(product.downloaded){
+            var productName = product.id.split(".").pop();
+            displayDownloadedContent(cordova.file.dataDirectory + productName, displayEl);
+        }
     });
 
     // When the store is ready (i.e. all products are loaded and in their "final"
@@ -212,6 +307,94 @@ app.renderIAP = function(p) {
         }
     }
 };
+
+
+//
+// Internal functions
+// ------------------
+//
+
+function displayDownloadedContent(contentPath, displayEl){
+    var failedFileReadCallback = function(error){
+        log("Error reading downloaded content: "+JSON.stringify(error));
+    };
+    window.resolveLocalFileSystemURL(contentPath, function(dir){
+        dir.getFile("payload.txt", {create: false}, function (fileEntry) {
+            fileEntry.file(function(file) {
+                var reader = new FileReader();
+                reader.onloadend = function(evt) {
+                    if(evt.target.error){
+                        failedFileReadCallback(evt.target.error)
+                    }else if(evt.target.result){
+                        displayEl.innerHTML = evt.target.result;
+                    }else{
+                        failedFileReadCallback("No file contents found");
+                    }
+
+                };
+                reader.readAsText(file);
+            }, failedFileReadCallback);
+        }, failedFileReadCallback);
+    },failedFileReadCallback);
+}
+
+function downloadNonHostedContent(product){
+
+    var fileTransfer = new FileTransfer();
+    fileTransfer.onprogress = function(progressEvent) {
+        if (progressEvent.lengthComputable) {
+            var percentage = Math.floor(progressEvent.loaded / progressEvent.total * 100);
+            product.set({
+                progress: percentage,
+                state: store.DOWNLOADING
+            });
+            product.stateChanged();
+        }else{
+            product.set("state", store.DOWNLOADING);
+        }
+    };
+
+    product.name = product.id.split(".").pop();
+    var sourceURI = encodeURI(app.nonHostedContentUrl);
+    var targetFilePath = cordova.file.cacheDirectory + product.name;
+
+    fileTransfer.download(
+        sourceURI,
+        targetFilePath,
+        function(fileEntry) {
+            log("Download complete: " + fileEntry.toURL());
+            deployNonHostedContent(product, fileEntry);
+        },
+        function(error) {
+            if(error.source){
+                log("download error source " + error.source);
+            }
+            if(error.target){
+                log("download error target " + error.target);
+            }
+        },
+        true
+    );
+}
+
+function deployNonHostedContent(product, zipFileEntry){
+    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dataDirectory){
+        dataDirectory.getDirectory(product.name, {create: true}, function(targetDirectory) {
+            zip.unzip(zipFileEntry.toURL(), targetDirectory.toURL(), function(result) {
+                if(result === 0){
+                    log("Content unpacking complete: " + targetDirectory.toURL());
+                    product.set("state", store.DOWNLOADED);
+                }else{
+                    log("Error unzipping content zip");
+                }
+            });
+        }, function(error){
+            log("Error creating directory for product content: "+JSON.stringify(error));
+        });
+    },function(error){
+        log("Error resolving data directory location: "+JSON.stringify(error));
+    });
+}
 
 // 
 // Utilities
