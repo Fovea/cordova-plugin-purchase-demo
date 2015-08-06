@@ -47,11 +47,7 @@ app.initialize = function() {
 // will just initialize the Purchase plugin
 app.onDeviceReady = function() {
     log('onDeviceReady');
-    //alert("This alert interrupts the main JS thread so you can connect a remote debugger to the WebView...");
-    setTimeout(function(){
-        this.initStore();
-    }.bind(this), 2000);
-    
+    this.initStore();
 };
 
 // initialize the purchase plugin if available
@@ -65,8 +61,6 @@ app.initStore = function() {
     app.platform = device.platform.toLowerCase();
     document.getElementsByTagName('body')[0].className = app.platform;
 
-    //debugger;
-
     // Enable maximum logging level
     store.verbosity = store.DEBUG;
 
@@ -76,32 +70,32 @@ app.initStore = function() {
     // Inform the store of your products
     log('registerProducts');
     store.register({
-        id:    'uk.co.workingedge.test.inapp.consumable1',
+        id:    'consumable1', // id without package name!
         alias: 'extra life',
         type:   store.CONSUMABLE
     });
 
     store.register({
-        id:    'uk.co.workingedge.test.inapp.nonconsumable1',
+        id:    'nonconsumable1', // id without package name!
         alias: 'full version',
         type:   store.NON_CONSUMABLE
     });
 
     store.register({
-        id:    'uk.co.workingedge.test.inapp.subscription1',
+        id:    'subscription1', // id without package name!
         alias: 'subscription1',
         type:  store.PAID_SUBSCRIPTION
     });
 
     store.register({
-        id:    'uk.co.workingedge.test.inapp.nonconsumablenonhosted1',
+        id:    'nonconsumablenonhosted1', // id without package name!
         alias: 'non-hosted content download',
         type:   store.NON_CONSUMABLE
     });
 
     if(app.platform === "ios"){
         store.register({
-            id:    'uk.co.workingedge.test.inapp.nonconsumablehosted1',
+            id:    'nonconsumablehosted1', // id without package name!
             alias: 'hosted content download',
             type:   store.NON_CONSUMABLE
         });
@@ -288,8 +282,7 @@ app.initStore = function() {
 
 app.renderIAP = function(p) {
 
-    var parts = p.id.split(".");
-    var elId = parts[parts.length-1];
+    var elId = p.id.split(".")[3];
 
     var el = document.getElementById(elId + '-purchase');
     if (!el) return;
