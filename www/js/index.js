@@ -282,7 +282,8 @@ app.initStore = function() {
 
 app.renderIAP = function(p) {
 
-    var elId = p.id.split(".")[3];
+    var parts = p.id.split(".");
+    var elId = parts[parts.length-1];
 
     var el = document.getElementById(elId + '-purchase');
     if (!el) return;
