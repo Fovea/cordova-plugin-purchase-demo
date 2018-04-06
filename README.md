@@ -12,11 +12,11 @@ usage
 ```
     cordova platform add ios
     cordova platform add android
-    cordova plugin add org.apache.cordova.console
+    cordova plugin add cordova-plugin-console
 ```
  - add the purchase plugin:
 ```
-    cordova plugin add cc.fovea.cordova.purchase
+    cordova plugin add cordova-plugin-purchase
 ```
  - setup for ios
    - see https://github.com/j3k0/cordova-plugin-purchase/wiki/Setup
@@ -49,5 +49,5 @@ You can install from your local disk:
 ```
 To refresh to the latest local version, remove it first with:
 ```
-    cordova plugin remove cc.fovea.cordova.purchase
+    cordova plugin remove cordova-plugin-purchase
 ```
